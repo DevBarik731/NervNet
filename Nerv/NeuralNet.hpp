@@ -104,7 +104,7 @@ class NeuralNetwork{
         matScalar(Loss[l],(2.0/m));
 
         if(L[l-1].Act=="ReLU") Loss[l]=D_ReLU(Loss[l],L[l-1].Z);
-
+        if(L[l-1].Act=="sigmoid") Loss[l]=D_sigmoid(Loss[l],L[l-1].Z);
         for(int i=l-1;i>=0;i--){
 
             d_W[i]=matmul(matT(A[i]),Loss[i+1]);
@@ -145,5 +145,7 @@ class NeuralNetwork{
         }
         return Y_out;
     }
+
+    
 };
 #endif

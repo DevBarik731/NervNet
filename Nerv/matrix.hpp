@@ -159,6 +159,14 @@ void sigmoid(matrix &a){
     }
 }
 
+void sigToBin(matrix &a){
+    for(auto &x:a){
+        for(auto &y:x){
+           if(y>=0.5) y=1;
+           else y=0; 
+        }
+    }
+}
 
 // Rectified Linear Unit
 void ReLU(matrix &a){
@@ -182,6 +190,19 @@ matrix D_ReLU(matrix &A,matrix &a){
     
 }
 
+matrix D_sigmoid(matrix &A,matrix &a){
+    matrix z=a;
+    for(int i=0;i<a.size();i++){
+        for(int j=0;j<a[0].size();j++){
+            double t;
+            if(a[i][j]>=0) t=exp(-a[i][j]);
+            else t=exp(a[i][j]);
+            z[i][j]=(t/((t+1)*(t+1)));
+            z[i][j]*=A[i][j];
+        }
+    }
+    return z;
+}
 
 double RMSE(matrix &Y,matrix &Y_pred){
     double error=0.0;
@@ -194,6 +215,19 @@ double RMSE(matrix &Y,matrix &Y_pred){
     error=(error*(1.0)/(m+0.00001));
     return sqrt(error);
 }
+
+// calculating accuracy
+double accuracy(matrix &Y,matrix &Y_pred){
+    double accuracy=0.0;
+    double m=Y.size();
+    for(int i=0;i<Y.size();i++){
+        for(int j=0;j<Y[0].size();j++){
+            if(Y[i][j]==Y_pred[i][j]) accuracy++;
+        }
+    }
+    return (accuracy)*1.0/m;
+}
+
 
 // calculating Z-score for dataset
 class Zscale{
