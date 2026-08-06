@@ -1,8 +1,8 @@
-# C++ Machine Learning Library
+# 🚀 C++ Machine Learning Library
 
 This repository contains the source code for a C++ library implementing fundamental machine learning algorithms from scratch, without relying on external ML frameworks.
 
-## Features
+## ✨ Features
 
 Currently implemented:
 
@@ -10,8 +10,23 @@ Currently implemented:
 - Z-score Normalization
 - Linear Regression
 - Logistic Regression
-- Neural Networks (currently supports a single output node)
+- Neural Networks
+    - Regression
+    - Binary Classification
 
-## Future Plans
+## 📊 Performance
+
+This library was used to train a neural network on the **Introvert-Extrovert** dataset from the Kaggle Playground Series:
+
+https://www.kaggle.com/competitions/playground-series-s5e7/overview
+
+### 🏆 Results
+
+- **95.79%** accuracy on the development set.
+- **95.32%** accuracy on the Kaggle.
+
+The current implementation prioritizes correctness and readability over speed. Training on this dataset takes approximately **20 minutes**, and performance optimization is one of the next goals for this project.
+
+## 🔮 Future Plans
 
 I plan to add more machine learning algorithms and utilities as I continue learning the theoretical foundations of machine learning.
