@@ -13,6 +13,7 @@ Currently implemented:
 - Neural Networks
     - Regression
     - Binary Classification
+- Mini-Batch Gradient Descent
 
 ## 📊 Performance
 
@@ -25,7 +26,8 @@ https://www.kaggle.com/competitions/playground-series-s5e7/overview
 - **95.79%** accuracy on the development set.
 - **95.32%** accuracy on the Kaggle.
 
-The current implementation prioritizes correctness and readability over speed. Training on this dataset takes approximately **20 minutes**, and performance optimization is one of the next goals for this project.
+The previous implementation took **20 minutes** to train on the Introvert-Extrovert dataset. After using mini-batches, the training time decreased to **2–3 minutes** while maintaining the same accuracy.
+
 
 ## 🔮 Future Plans
 
