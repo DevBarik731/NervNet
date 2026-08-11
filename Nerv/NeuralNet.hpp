@@ -48,9 +48,12 @@ class NeuralNetwork{
     vector<matrix> d_W;
     vector<matrix> Loss={{}};
     vector<matrix> d_B;
-    matrix X,Y;
+    vector<matrix> X,Y;
     double alpha;
-    void fit(matrix &_X,matrix &_Y,double _alpha){
+    void fit(matrix &_X,matrix &_Y,double _alpha,int batch_size=1){
+        if(batch_size<=0){
+            cout<<"Can't be a non-positive batch size"<<endl;
+        }
         alpha=_alpha;
         if(!_X.size() || !_X[0].size() || !_Y.size() || !_Y[0].size()){
             cout<<"Invalid Data for Neural Network"<<endl;
@@ -68,9 +71,29 @@ class NeuralNetwork{
             cout<<"Invalid Data for Neural Network"<<endl;
             return;
         }
-        X=_X;
-        Y=_Y;
-        A.push_back(X);
+        // X=_X;
+        // Y=_Y;
+        matrix temp_X;
+        for(int i=0;i<_X.size();i++){
+            temp_X.push_back(_X[i]);
+            if((i+1)%batch_size==0){
+                X.push_back(temp_X);
+                temp_X={};
+            }
+        }
+        if(temp_X.size()) X.push_back(temp_X);
+
+        matrix temp_Y;
+        for(int i=0;i<_Y.size();i++){
+            temp_Y.push_back(_Y[i]);
+            if((i+1)%batch_size==0){
+                Y.push_back(temp_Y);
+                temp_Y={};
+            }
+        }
+        if(temp_Y.size()) Y.push_back(temp_Y);
+
+        A.push_back(X[0]);
     }
 
     void addLayer(int m,string s="Linear"){
@@ -90,17 +113,24 @@ class NeuralNetwork{
 
     void ForwardProp(){
         for(int i=1;i<A.size();i++){
+            A[i]=(L[i-1].flow(A[i-1]));
+        }
+    }
+
+    void UpdateWeights(){
+        for(int i=1;i<A.size();i++){
             matScalar(d_W[i-1],alpha);
             matScalar(d_B[i-1],alpha);
             L[i-1].W=matsub(L[i-1].W,d_W[i-1]);
             L[i-1].B=matsub(L[i-1].B,d_B[i-1]);
-            A[i]=(L[i-1].flow(A[i-1]));
         }
     }
-    void BackProp(){
-        int m=Y.size();
+
+    
+    void BackProp(matrix &Y_mini){
+        int m=Y_mini.size();
         int l=L.size();
-        Loss[l]=matsub(A[l],Y);
+        Loss[l]=matsub(A[l],Y_mini);
         matScalar(Loss[l],(2.0/m));
 
         if(L[l-1].Act=="ReLU") Loss[l]=D_ReLU(Loss[l],L[l-1].Z);
@@ -122,10 +152,15 @@ class NeuralNetwork{
             }
         }
     }
-    void train(int steps){
-        for(int it=0;it<steps;it++){
-            BackProp();
-            ForwardProp();
+    void train(int epoch){
+        for(int it=0;it<epoch;it++){
+            for(int k=0;k<X.size();k++){
+                A[0]=X[k];
+                ForwardProp();
+                BackProp(Y[k]);
+                UpdateWeights();
+            }
+            
         }
     }
     matrix predict(matrix &X_test){
