@@ -14,6 +14,7 @@ Currently implemented:
     - Regression
     - Binary Classification
 - Mini-Batch Gradient Descent
+- Adam optimizer
 
 ## 📊 Performance
 
@@ -28,6 +29,7 @@ https://www.kaggle.com/competitions/playground-series-s5e7/overview
 
 The previous implementation took **20 minutes** to train on the Introvert-Extrovert dataset. After using mini-batches, the training time decreased to **2–3 minutes** while maintaining the same accuracy.
 
+It further decreased to **30-60 seconds** after implementing Adam.
 
 ## 🔮 Future Plans
 
