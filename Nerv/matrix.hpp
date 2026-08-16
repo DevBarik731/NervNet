@@ -87,6 +87,15 @@ void matScalar(matrix &a,double k){
     }
 }
 
+matrix matSquare(matrix &a){
+    matrix z=a;
+    for(auto &x:z){
+        for(auto &y:x){
+            y*=y;
+        }
+    }
+    return z;
+}
 
 //taking Transpose
 matrix matT(const matrix& a){

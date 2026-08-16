@@ -49,7 +49,10 @@ class NeuralNetwork{
     vector<matrix> Loss={{}};
     vector<matrix> d_B;
     vector<matrix> X,Y;
-    double alpha;
+    vector<matrix> V_W,V_B,S_W,S_B;
+    double alpha,beta_1=0.9,beta_2=0.999;
+    double ep=1e-8;
+
     void fit(matrix &_X,matrix &_Y,double _alpha,int batch_size=1){
         if(batch_size<=0){
             cout<<"Can't be a non-positive batch size"<<endl;
@@ -106,8 +109,16 @@ class NeuralNetwork{
         matrix a=lyr.flow(A.back());
         L.push_back(lyr);
         A.push_back(a);
+
         d_W.push_back({{}});
+        V_W.push_back({{}});
+        S_W.push_back({{}});
+
+        
         d_B.push_back({{}});
+        V_B.push_back({{}});
+        S_B.push_back({{}});
+
         Loss.push_back({{}});
     }
 
@@ -116,11 +127,40 @@ class NeuralNetwork{
             A[i]=(L[i-1].flow(A[i-1]));
         }
     }
+    void Adam(int it){
+        matScalar(V_W[it],beta_1);
+        matScalar(V_B[it],beta_1);
+        matScalar(S_W[it],beta_2);
+        matScalar(S_B[it],beta_2);
 
+        matrix w_sq=matSquare(d_W[it]);
+        matrix b_sq=matSquare(d_B[it]);
+
+        matScalar(d_W[it],1.0-beta_1);
+        matScalar(d_B[it],1.0-beta_1);
+        matScalar(w_sq,1.0-beta_2);
+        matScalar(b_sq,1.0-beta_2);
+
+        V_W[it]=matadd(V_W[it],d_W[it]);
+        V_B[it]=matadd(V_B[it],d_B[it]);
+        S_W[it]=matadd(S_W[it],w_sq);
+        S_B[it]=matadd(S_B[it],b_sq);
+        
+        for(int i=0;i<d_W[it].size();i++){
+            for(int j=0;j<d_W[it][0].size();j++){
+                d_W[it][i][j]=alpha*(V_W[it][i][j])/((sqrt(S_W[it][i][j]))+ep);
+            }
+        }
+        for(int i=0;i<d_B[it].size();i++){
+            for(int j=0;j<d_B[it][0].size();j++){
+                d_B[it][i][j]=alpha*(V_B[it][i][j])/((sqrt(S_B[it][i][j]))+ep);
+            }
+        }
+    }
     void UpdateWeights(){
+
         for(int i=1;i<A.size();i++){
-            matScalar(d_W[i-1],alpha);
-            matScalar(d_B[i-1],alpha);
+            Adam(i-1);
             L[i-1].W=matsub(L[i-1].W,d_W[i-1]);
             L[i-1].B=matsub(L[i-1].B,d_B[i-1]);
         }
@@ -139,11 +179,19 @@ class NeuralNetwork{
 
             d_W[i]=matmul(matT(A[i]),Loss[i+1]);
 
+            if(V_W[i][0].size()==0) zero(V_W[i],d_W[i].size(),d_W[i][0].size());
+            if(S_W[i][0].size()==0) zero(S_W[i],d_W[i].size(),d_W[i][0].size());
+
+
+
             if(i>0) Loss[i]=matmul(Loss[i+1],matT(L[i].W));
 
             if(i>0 && L[i-1].Act=="ReLU") Loss[i]=D_ReLU(Loss[i],L[i-1].Z);
 
             zero(d_B[i],1,Loss[i+1][0].size());
+
+            if(V_B[i][0].size()==0) zero(V_B[i],1,Loss[i+1][0].size());
+            if(S_B[i][0].size()==0) zero(S_B[i],1,Loss[i+1][0].size());
 
             for(int j=0;j<Loss[i+1][0].size();j++){
                 for(int k=0;k<Loss[i+1].size();k++){
