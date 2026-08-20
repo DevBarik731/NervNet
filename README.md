@@ -1,5 +1,4 @@
-# 🚀 C++ Machine Learning Library
-
+# 🚀 NervNet
 This repository contains the source code for a C++ library implementing fundamental machine learning algorithms from scratch, without relying on external ML frameworks.
 
 ## ✨ Features
