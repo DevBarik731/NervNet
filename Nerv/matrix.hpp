@@ -7,28 +7,70 @@
 #include <cmath>
 using namespace std;
 // using 2D vector as matrix
-typedef vector<vector<double>> matrix;
+class matrix{
+    public:
+    vector<vector<double>> data;
+    void display(){
+        int n=data.size();
+        int m=data[0].size();
+        if(!n || !m){
+            cout<<"Empty Matrix"<<endl;
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++) cout<<data[i][j]<<" ";
+            cout<<"\n";
+        }
+    }
 
-// assigning zeros to matrix
-void zero(matrix &A,int a,int b){
-    A=matrix(a,vector<double>(b,0));
+    void zero(int a,int b){
+        data=vector<vector<double>>(a,vector<double>(b,0));
+    }
+
+    void sigmoid(){
+        for(auto &x:data){
+            for(auto &y:x){
+            if(y>=0) y=1.0/(1.0+exp(-y));
+            else{
+                double t=exp(y);
+                y=t/(1+t);
+            }
+            }
+        }
+    }
+
+    void sigToBin(){
+        for(auto &x:data){
+            for(auto &y:x){
+            if(y>=0.5) y=1;
+            else y=0; 
+            }
+        }
+    }
+
+    void ReLU(){
+    for(auto &x:data){
+        for(auto &y:x){
+            y=max(y,0.0);
+        }
+    }
 }
-
+};
+matrix nullmat;
 // subtraction of matrices
-matrix matsub(const matrix&a,const matrix&b){
-    int a_row=a.size();
-    int a_col=a[0].size();
-    int b_row=b.size();
-    int b_col=b[0].size();
+matrix operator-(const matrix& a, const matrix& b){
+    int a_row=a.data.size();
+    int a_col=a.data[0].size();
+    int b_row=b.data.size();
+    int b_col=b.data[0].size();
     matrix result;
-    result=matrix(a_row,vector<double>(a_col,0));
+    result.zero(a_row,a_col);
     if((a_col!=b_col && b_col!=1) || (a_row!=b_row && b_row!=1)){
         cout<<"Invalid"<<endl;
-        return {};
+        return nullmat;
     }
     for(int i=0;i<a_row;i++){
         for(int j=0;j<a_col;j++){
-            result[i][j]=a[i][j]-b[i%b_row][j%b_col];
+            result.data[i][j]=a.data[i][j]-b.data[i%b_row][j%b_col];
         }
     }
     return result;
@@ -36,20 +78,20 @@ matrix matsub(const matrix&a,const matrix&b){
 }
 
 // addition of matrices
-matrix matadd(const matrix&a,const matrix&b){
-    int a_row=a.size();
-    int a_col=a[0].size();
-    int b_row=b.size();
-    int b_col=b[0].size();
+matrix operator+(const matrix& a, const matrix& b){
+    int a_row=a.data.size();
+    int a_col=a.data[0].size();
+    int b_row=b.data.size();
+    int b_col=b.data[0].size();
     matrix result;
-    result=matrix(a_row,vector<double>(a_col,0));
+    result.zero(a_row,a_col);
     if((a_col!=b_col && b_col!=1) || (a_row!=b_row && b_row!=1)){
         cout<<"Invalid"<<endl;
-        return {};
+        return nullmat;
     }
     for(int i=0;i<a_row;i++){
         for(int j=0;j<a_col;j++){
-            result[i][j]=a[i][j]+b[i%b_row][j%b_col];
+            result.data[i][j]=a.data[i][j]+b.data[i%b_row][j%b_col];
         }
     }
     return result;
@@ -57,39 +99,51 @@ matrix matadd(const matrix&a,const matrix&b){
 
 
 //multiplication of Matrices
-matrix matmul(const matrix& a,const matrix &b){
+matrix operator*(const matrix& a,const matrix &b){
     matrix result;
-    int a_row=a.size();
-    int a_col=a[0].size();
-    int b_row=b.size();
-    int b_col=b[0].size();
+    int a_row=a.data.size();
+    int a_col=a.data[0].size();
+    int b_row=b.data.size();
+    int b_col=b.data[0].size();
     if(a_col!=b_row){
         cout<<"invalid matrix multiplication"<<endl;
         return result;
     }
-    result=matrix(a_row,vector<double>(b_col,0));
+    result.zero(a_row,b_col);
     for(int i=0;i<a_row;i++){
         for(int j=0;j<b_col;j++){
             double sum=0;
-            for(int it=0;it<a_col;it++) sum+=(a[i][it]*b[it][j]);
-            result[i][j]=sum;
+            for(int it=0;it<a_col;it++) sum+=(a.data[i][it]*b.data[it][j]);
+            result.data[i][j]=sum;
         }
     }
     return result;
 }
 
 //multiplying scalar with matrix
-void matScalar(matrix &a,double k){
-    for(auto &x:a){
+matrix operator*(const matrix &a,double k){
+    matrix result=a;
+    for(auto &x:result.data){
         for(auto &y:x){
             y*=k;
         }
     }
+    return result;
 }
 
-matrix matSquare(matrix &a){
+matrix operator*(double k,const matrix &a){
+    matrix result=a;
+    for(auto &x:result.data){
+        for(auto &y:x){
+            y*=k;
+        }
+    }
+    return result;
+}
+
+matrix matSquare(const matrix &a){
     matrix z=a;
-    for(auto &x:z){
+    for(auto &x:z.data){
         for(auto &y:x){
             y*=y;
         }
@@ -98,30 +152,23 @@ matrix matSquare(matrix &a){
 }
 
 //taking Transpose
-matrix matT(const matrix& a){
-    matrix result(a[0].size(),vector<double>(a.size(),0));
+matrix matT(const matrix& _a){
+    vector<vector<double>> a=_a.data;
+    matrix result;
+    result.zero(a[0].size(),a.size());
     for(int i=0;i<(a.size());i++){
         for(int j=0;j<a[0].size();j++){
-            result[j][i]=a[i][j];
+            result.data[j][i]=a[i][j];
         }
     }
     return result;
 }
 
-//Displaying matrix
-void matDisplay(matrix &a){
-    int n=a.size();
-    int m=a[0].size();
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++) cout<<a[i][j]<<" ";
-        cout<<"\n";
-    }
-}
 
 // reading Numeric CSV as a matrix;
 matrix readCSV(const string &filename) {
     ifstream file(filename);
-    matrix data;
+    matrix dataMat;
     string line;
     getline(file,line);
     
@@ -133,66 +180,38 @@ matrix readCSV(const string &filename) {
         while(getline(ss, cell, ',')) {
             row.push_back(stod(cell));
         }
-        data.push_back(row);
+        dataMat.data.push_back(row);
     }
-    return data;
+    return dataMat;
 }
 
 // splitting the dataset into features and result
 void split(const matrix& A,matrix &X,matrix &Y){
-    int n=A.size();
-    int m=A[0].size();
+    int n=A.data.size();
+    int m=A.data[0].size();
     if(m<=1){
         cout<<"Can't Be Splited"<<endl;
         return;
     }
-    zero(X,n,m-1);
-    zero(Y,n,1);
+    X.zero(n,m-1);
+    Y.zero(n,1);
     for(int i=0;i<n;i++){
         for(int j=0;j<m;j++){
-            if(j==m-1) Y[i][0]=A[i][j];
-            else X[i][j]=A[i][j];
-        }
-    }
-}
-// sigmoids function
-void sigmoid(matrix &a){
-    for(auto &x:a){
-        for(auto &y:x){
-           if(y>=0) y=1.0/(1.0+exp(-y));
-           else{
-            double t=exp(y);
-            y=t/(1+t);
-           }
-        }
-    }
-}
-
-void sigToBin(matrix &a){
-    for(auto &x:a){
-        for(auto &y:x){
-           if(y>=0.5) y=1;
-           else y=0; 
+            if(j==m-1) Y.data[i][0]=A.data[i][j];
+            else X.data[i][j]=A.data[i][j];
         }
     }
 }
 
 // Rectified Linear Unit
-void ReLU(matrix &a){
-    for(auto &x:a){
-        for(auto &y:x){
-            y=max(y,0.0);
-        }
-    }
-}
 
 matrix D_ReLU(matrix &A,matrix &a){
     matrix z=a;
-    for(int i=0;i<a.size();i++){
-        for(int j=0;j<a[0].size();j++){
-            if(a[i][j]>0) z[i][j]=1;
-            else z[i][j]=0;
-            z[i][j]*=A[i][j];
+    for(int i=0;i<a.data.size();i++){
+        for(int j=0;j<a.data[0].size();j++){
+            if(a.data[i][j]>0) z.data[i][j]=1;
+            else z.data[i][j]=0;
+            z.data[i][j]*=A.data[i][j];
         }
     }
     return z;
@@ -201,13 +220,13 @@ matrix D_ReLU(matrix &A,matrix &a){
 
 matrix D_sigmoid(matrix &A,matrix &a){
     matrix z=a;
-    for(int i=0;i<a.size();i++){
-        for(int j=0;j<a[0].size();j++){
+    for(int i=0;i<a.data.size();i++){
+        for(int j=0;j<a.data[0].size();j++){
             double t;
-            if(a[i][j]>=0) t=exp(-a[i][j]);
-            else t=exp(a[i][j]);
-            z[i][j]=(t/((t+1)*(t+1)));
-            z[i][j]*=A[i][j];
+            if(a.data[i][j]>=0) t=exp(-a.data[i][j]);
+            else t=exp(a.data[i][j]);
+            z.data[i][j]=(t/((t+1)*(t+1)));
+            z.data[i][j]*=A.data[i][j];
         }
     }
     return z;
@@ -215,10 +234,10 @@ matrix D_sigmoid(matrix &A,matrix &a){
 
 double RMSE(matrix &Y,matrix &Y_pred){
     double error=0.0;
-    double m=Y.size();
-    for(int i=0;i<Y.size();i++){
-        for(int j=0;j<Y[0].size();j++){
-            error+=((Y[i][j]-Y_pred[i][j])*(Y[i][j]-Y_pred[i][j]));
+    double m=Y.data.size();
+    for(int i=0;i<Y.data.size();i++){
+        for(int j=0;j<Y.data[0].size();j++){
+            error+=((Y.data[i][j]-Y_pred.data[i][j])*(Y.data[i][j]-Y_pred.data[i][j]));
         }
     }
     error=(error*(1.0)/(m+0.00001));
@@ -228,10 +247,10 @@ double RMSE(matrix &Y,matrix &Y_pred){
 // calculating accuracy
 double accuracy(matrix &Y,matrix &Y_pred){
     double accuracy=0.0;
-    double m=Y.size();
-    for(int i=0;i<Y.size();i++){
-        for(int j=0;j<Y[0].size();j++){
-            if(Y[i][j]==Y_pred[i][j]) accuracy++;
+    double m=Y.data.size();
+    for(int i=0;i<Y.data.size();i++){
+        for(int j=0;j<Y.data[0].size();j++){
+            if(Y.data[i][j]==Y_pred.data[i][j]) accuracy++;
         }
     }
     return (accuracy)*1.0/m;
@@ -244,24 +263,24 @@ class Zscale{
     vector<double> mean,var,stdv;
 
     void fit(matrix &a){
-    if (a.empty() || a[0].empty()) {
+    if (a.data.empty() || a.data[0].empty()) {
         cout<<"Invalid Data set cannot be fitted into scale"<<endl;
         return;
     }
-    int n=a[0].size();
-    int m=a.size();
+    int n=a.data[0].size();
+    int m=a.data.size();
     mean=vector<double>(n,0);
     var=vector<double>(n,0);
     stdv=vector<double>(n,0);
     for(int j=0;j<n;j++){
         for(int i=0;i<m;i++){
-            mean[j]+=a[i][j];
+            mean[j]+=a.data[i][j];
         }
         mean[j]=mean[j]/(1.0*m);
     }
     for(int j=0;j<n;j++){
         for(int i=0;i<m;i++){
-            var[j]+=((a[i][j]-mean[j])*(a[i][j]-mean[j]));
+            var[j]+=((a.data[i][j]-mean[j])*(a.data[i][j]-mean[j]));
         }
         var[j]=(var[j]/(1.0*m));
     }
@@ -270,7 +289,7 @@ class Zscale{
 
 
 void scale(matrix &a){
-    if(a.size()==0 || a[0].size()==0){
+    if(a.data.size()==0 || a.data[0].size()==0){
         cout<<"Invalid DataSet Can't be scaled"<<endl;
         return;
     }
@@ -278,18 +297,18 @@ void scale(matrix &a){
         cout<<"No fitted data on scale"<<endl;
         return;
     }
-    int n=a[0].size();
-    int m=a.size();
+    int n=a.data[0].size();
+    int m=a.data.size();
     for(int j=0;j<n;j++){
         for(int i=0;i<m;i++){
-            if(stdv[j]==0) a[i][j]=0;
-            else a[i][j]=(a[i][j]-mean[j])/stdv[j];
+            if(stdv[j]==0) a.data[i][j]=0;
+            else a.data[i][j]=(a.data[i][j]-mean[j])/stdv[j];
         }
     }
 }
 
 void descale(matrix &a){
-    if(a.size()==0 || a[0].size()==0){
+    if(a.data.size()==0 || a.data[0].size()==0){
         cout<<"Invalid DataSet Can't be scaled"<<endl;
         return;
     }
@@ -297,11 +316,11 @@ void descale(matrix &a){
         cout<<"No fitted data on scale"<<endl;
         return;
     }
-    int n=a[0].size();
-    int m=a.size();
+    int n=a.data[0].size();
+    int m=a.data.size();
     for(int j=0;j<n;j++){
         for(int i=0;i<m;i++){
-            a[i][j]=a[i][j]*stdv[j]+mean[j];
+            a.data[i][j]=a.data[i][j]*stdv[j]+mean[j];
         }
     }
 }

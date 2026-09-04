@@ -17,10 +17,10 @@ class LinearRegression{
     matrix W,d_w,B,X,Y;
     int n,m;
     void fit(matrix &x,matrix &y){
-        int n_x=x[0].size();
-        int m_x=x.size();
-        int n_y=y[0].size();
-        int m_y=y.size();
+        int n_x=x.data[0].size();
+        int m_x=x.data.size();
+        int n_y=y.data[0].size();
+        int m_y=y.data.size();
         if(m_x!=m_y){
             cout<<"Invalid Dataset"<<endl;
             return;
@@ -33,34 +33,34 @@ class LinearRegression{
         m=m_x;
         X=x;
         Y=y;
-        zero(B,1,1);
-        zero(W,n,1);
-        zero(d_w,n,1);
+        B.zero(1,1);
+        W.zero(n,1);
+        d_w.zero(n,1);
     }
     void train(int steps,double alpha){
         matrix X_T=matT(X);
         for(int i=0;i<steps;i++){
-            matrix Y_pred=matadd(matmul(X,W),B);
-            matrix Y_delta=matsub(Y_pred,Y);
-            d_w=matmul(X_T,Y_delta);
-            matScalar(d_w,(1.0*alpha)/m);
-            W=matsub(W,d_w);
+            matrix Y_pred=X*W+B;
+            matrix Y_delta=Y_pred-Y;
+            d_w=X_T*Y_delta;
+            d_w=(d_w*((1.0*alpha)/m));
+            W=W-d_w;
             double sum=0;
             for(int i=0;i<m;i++){
-                sum+=Y_delta[i][0];
+                sum+=Y_delta.data[i][0];
             }
             sum=(sum*alpha)/(1.0*m);
-            B[0][0]-=(sum);
+            B.data[0][0]-=(sum);
         }
     }
     matrix predict(matrix &x){
-        int n_x=x[0].size();
-        int m_x=x.size();
+        int n_x=x.data[0].size();
+        int m_x=x.data.size();
         if(n_x!=n){
             cout<<"Invalid dataset"<<endl;
             return {};
         }
-        matrix Y_pred=matadd(matmul(x,W),B);
+        matrix Y_pred=x*W+B;
         return Y_pred;
     }
     
@@ -72,10 +72,10 @@ public:
     matrix W,d_w,B,X,Y;
     int n,m;
     void fit(matrix &x,matrix &y){
-        int n_x=x[0].size();
-        int m_x=x.size();
-        int n_y=y[0].size();
-        int m_y=y.size();
+        int n_x=x.data[0].size();
+        int m_x=x.data.size();
+        int n_y=y.data[0].size();
+        int m_y=y.data.size();
         if(m_x!=m_y){
             cout<<"Invalid Dataset"<<endl;
             return;
@@ -84,7 +84,7 @@ public:
             cout<<"Invalid Dataset"<<endl;
             return;
         }
-        for(auto &a:y){
+        for(auto &a:y.data){
             for(auto &b:a){
                 if(b!=0 && b!=1){
                     cout<<"Only 0/1 y is valid in Logistic Regression"<<endl;
@@ -96,42 +96,37 @@ public:
         m=m_x;
         X=x;
         Y=y;
-        zero(B,1,1);
-        zero(W,n,1);
-        zero(d_w,n,1);
+        B.zero(1,1);
+        W.zero(n,1);
+        d_w.zero(n,1);
     }
     void train(int steps,double alpha){
         matrix X_T=matT(X);
         for(int i=0;i<steps;i++){
-            matrix Y_pred=matadd(matmul(X,W),B);
-            sigmoid(Y_pred);
-            matrix Y_delta=matsub(Y_pred,Y);
-            d_w=matmul(X_T,Y_delta);
-            matScalar(d_w,(1.0*alpha)/m);
-            W=matsub(W,d_w);
+            matrix Y_pred=X*W+B;
+            Y_pred.sigmoid();
+            matrix Y_delta=Y_pred-Y;
+            d_w=X_T*Y_delta;
+            d_w=d_w*((1.0*alpha)/m);
+            W=W-d_w;
             double sum=0;
             for(int i=0;i<m;i++){
-                sum+=Y_delta[i][0];
+                sum+=Y_delta.data[i][0];
             }
             sum=(sum*alpha)/(1.0*m);
-            B[0][0]-=(sum);
+            B.data[0][0]-=(sum);
         }
     }
     matrix predict(matrix &x){
-        int n_x=x[0].size();
-        int m_x=x.size();
+        int n_x=x.data[0].size();
+        int m_x=x.data.size();
         if(n_x!=n){
             cout<<"Invalid dataset"<<endl;
             return {};
         }
-        matrix Y_pred=matadd(matmul(x,W),B);
-        sigmoid(Y_pred);
-        for(auto &a:Y_pred){
-            for(auto &b:a){
-                if(b>=0.5) b=1;
-                else b=0;
-            }
-        }
+        matrix Y_pred=x*W+B;
+        Y_pred.sigmoid();
+        Y_pred.sigToBin();
         return Y_pred;
     }
 };
