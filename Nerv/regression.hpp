@@ -1,5 +1,4 @@
-#ifndef REGRESSION_HPP
-#define REGRESSION_HPP
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -131,5 +130,3 @@ public:
     }
 };
 
-
-#endif

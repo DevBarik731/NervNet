@@ -1,5 +1,4 @@
-#ifndef NN_HPP
-#define NN_HPP
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -240,4 +239,3 @@ class NeuralNetwork{
 
     
 };
-#endif
