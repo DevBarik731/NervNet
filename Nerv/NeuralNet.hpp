@@ -36,6 +36,7 @@ class Layer{
         matrix A=Z;
         if(Act=="ReLU") A.ReLU();
         else if(Act=="sigmoid") A.sigmoid();
+        else if(Act=="softmax") A.softmax();
         return A;
     }
 };
@@ -70,10 +71,10 @@ class NeuralNetwork{
             cout<<"Invalid Data for Neural Network"<<endl;
             return;
         }
-        if(n_y!=1){
-            cout<<"Invalid Data for Neural Network"<<endl;
-            return;
-        }
+        // if(n_y!=1){
+        //     cout<<"Invalid Data for Neural Network"<<endl;
+        //     return;
+        // }
         // X=_X;
         // Y=_Y;
         matrix temp_X;
@@ -178,11 +179,18 @@ class NeuralNetwork{
     void BackProp(matrix &Y_mini){
         int m=Y_mini.data.size();
         int l=L.size();
-        Loss[l]=A[l]-Y_mini;
-        Loss[l]=Loss[l]*(2.0/m);
+        if(L[l-1].Act=="softmax"){
+            Loss[l]=A[l]-Y_mini;
+            Loss[l]=Loss[l]*(1.0/m);
+        }
+        else{
+            Loss[l]=A[l]-Y_mini;
+            Loss[l]=Loss[l]*(2.0/m);
 
-        if(L[l-1].Act=="ReLU") Loss[l]=D_ReLU(Loss[l],L[l-1].Z);
-        if(L[l-1].Act=="sigmoid") Loss[l]=D_sigmoid(Loss[l],L[l-1].Z);
+            if(L[l-1].Act=="ReLU") Loss[l]=D_ReLU(Loss[l],L[l-1].Z);
+            if(L[l-1].Act=="sigmoid") Loss[l]=D_sigmoid(Loss[l],L[l-1].Z);
+        }
+
         for(int i=l-1;i>=0;i--){
 
             d_W[i]=matT(A[i])*Loss[i+1];

@@ -11,10 +11,12 @@ class matrix{
     public:
     vector<vector<double>> data;
     void display(){
-        int n=data.size();
-        int m=data[0].size();
+        int n=0,m=0;
+        n=data.size();
+        if(n) m=data[0].size();
         if(!n || !m){
             cout<<"Empty Matrix"<<endl;
+            return;
         }
         for(int i=0;i<n;i++){
             for(int j=0;j<m;j++) cout<<data[i][j]<<" ";
@@ -48,12 +50,31 @@ class matrix{
     }
 
     void ReLU(){
-    for(auto &x:data){
-        for(auto &y:x){
-            y=max(y,0.0);
+        for(auto &x:data){
+            for(auto &y:x){
+                y=max(y,0.0);
+            }
         }
     }
-}
+    void softmax(){
+        int n=0,m=0;
+        n=data.size();
+        if(n) m=data[0].size();
+        if(!n || !m){
+            cout<<"Empty Matrix"<<endl;
+            return;
+        }
+        for(int i=0;i<n;i++){
+            double sum=0;
+            double mx=0;
+            for(int j=0;j<m;j++) mx=max(mx,data[i][j]);
+            for(int j=0;j<m;j++){
+                data[i][j]=exp(data[i][j]-mx);
+                sum+=data[i][j];
+            }
+            for(int j=0;j<m;j++) data[i][j]/=sum;
+        }
+    } 
 };
 matrix nullmat;
 // subtraction of matrices
@@ -186,18 +207,18 @@ matrix readCSV(const string &filename) {
 }
 
 // splitting the dataset into features and result
-void split(const matrix& A,matrix &X,matrix &Y){
+void split(const matrix& A,matrix &X,matrix &Y,int k){
     int n=A.data.size();
     int m=A.data[0].size();
-    if(m<=1){
+    if(k<=0 || m-k<=0){
         cout<<"Can't Be Splited"<<endl;
         return;
     }
-    X.zero(n,m-1);
-    Y.zero(n,1);
+    X.zero(n,m-k);
+    Y.zero(n,k);
     for(int i=0;i<n;i++){
         for(int j=0;j<m;j++){
-            if(j==m-1) Y.data[i][0]=A.data[i][j];
+            if(j>=m-k) Y.data[i][j+k-m]=A.data[i][j];
             else X.data[i][j]=A.data[i][j];
         }
     }
