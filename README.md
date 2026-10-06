@@ -12,14 +12,17 @@ Currently implemented:
 - Neural Networks
     - Regression
     - Binary Classification
+    - Multiclass Classification
 - Mini-Batch Gradient Descent
 - Adam optimizer
 
 ## Performance
 
-This library was used to train a neural network on the **Introvert-Extrovert** dataset from the Kaggle Playground Series:
+This library was used to train a neural network on the **Introvert-Extrovert** dataset and **Mobile Price** dataset from the Kaggle:
 
 https://www.kaggle.com/competitions/playground-series-s5e7/overview
+
+
 
 ### Results
 
