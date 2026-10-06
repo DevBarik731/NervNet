@@ -20,14 +20,13 @@ Currently implemented:
 
 This library was used to train a neural network on the **Introvert-Extrovert** dataset and **Mobile Price** dataset from the Kaggle:
 
-https://www.kaggle.com/competitions/playground-series-s5e7/overview
-
-
+- Introvert-Extrovert: https://www.kaggle.com/competitions/playground-series-s5e7/overview
+- Mobile Price : https://www.kaggle.com/datasets/iabhishekofficial/mobile-price-classification
 
 ### Results
 
-- **95.79%** accuracy on the development set.
-- **95.32%** accuracy on the Kaggle.
+- **96%** accuracy on the DevSet of Introvert-Extrovert dataset.
+- **93%** accuracy on the DevSet of Mobile-Price dataset
 
 The previous implementation took **20 minutes** to train on the Introvert-Extrovert dataset. After using mini-batches, the training time decreased to **2–3 minutes** while maintaining the same accuracy.
 
