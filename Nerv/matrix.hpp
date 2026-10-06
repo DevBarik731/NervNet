@@ -66,7 +66,7 @@ class matrix{
         }
         for(int i=0;i<n;i++){
             double sum=0;
-            double mx=0;
+            double mx=data[i][0];
             for(int j=0;j<m;j++) mx=max(mx,data[i][j]);
             for(int j=0;j<m;j++){
                 data[i][j]=exp(data[i][j]-mx);
@@ -74,7 +74,26 @@ class matrix{
             }
             for(int j=0;j<m;j++) data[i][j]/=sum;
         }
-    } 
+    }
+    
+    matrix sofToClass(){
+        matrix z;
+        int n=0,m=0;
+        n=data.size();
+        if(n) m=data[0].size();
+        if(!n || !m){
+            cout<<"Empty Matrix"<<endl;
+            return z;
+        }
+        z.zero(n,1);
+        for(int i=0;i<n;i++){
+            z.data[i][0]=0;
+            for(int j=0;j<m;j++){
+                if(data[i][j]>data[i][z.data[i][0]]) z.data[i][0]=j;
+            }
+        }
+        return z;
+    }
 };
 matrix nullmat;
 // subtraction of matrices
